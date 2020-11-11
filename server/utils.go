@@ -13,6 +13,7 @@ func FormParseMiddleware(handler http.Handler) http.Handler {
 		if err != nil {
 			w.WriteHeader(400)
 		}
+		handler.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(middleware)
 }

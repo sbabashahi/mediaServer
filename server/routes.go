@@ -2,19 +2,11 @@ package server
 
 import (
 	"fmt"
-	"mime/multipart"
 	"net/http"
 
-	"github.com/gorilla/schema"
+	"codeberg.org/ymazdy/mediamanager/media"
 	"github.com/julienschmidt/httprouter"
 )
-
-var decoder = schema.NewDecoder()
-
-type imageUploadRequest struct {
-	uid        string
-	uploadfile multipart.File
-}
 
 //TODO: remove index test after initial phase
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -22,13 +14,20 @@ func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 //TODO: implement connection to image save and resize
-func uploadImage(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	var req imageUploadRequest
-	err := decoder.Decode(&req, r.PostForm)
+func uploadImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	file, _, err := r.FormFile("uploadfile")
 	if err != nil {
 		parseErrorResponse(w)
+		return
 	}
-	defer req.uploadfile.Close()
+	defer file.Close()
+	uid := r.PostForm.Get("uid")
+	// contentType := handler.Header.Get("Content-Type")
+
+	media.SaveFileFromIOReader(uid+"/image.jpg", file)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("hello"))
 }
 
 // GetRouter returns the default server router

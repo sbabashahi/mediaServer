@@ -1,4 +1,4 @@
-package mediamanipulator
+package media
 
 import (
 	"log"
@@ -8,6 +8,8 @@ import (
 
 	"github.com/disintegration/imaging"
 )
+
+var basePath = ""
 
 //TODO: get sizes from config map instead of hardcoding them
 func generateThumb(filename string, path string) {
