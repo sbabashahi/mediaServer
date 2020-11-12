@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -20,4 +21,22 @@ func FormParseMiddleware(handler http.Handler) http.Handler {
 
 func parseErrorResponse(w http.ResponseWriter) {
 	fmt.Fprint(w, "Error parsing the request!\n")
+}
+
+func jsonResponse(w http.ResponseWriter, v interface{}) error {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	if v != nil {
+		body, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		// can just return an error when connection is hijacked or content-size is longer then declared.
+		if _, err := w.Write(body); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

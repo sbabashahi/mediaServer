@@ -13,21 +13,35 @@ func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
 }
 
+//MARK: upload user image route
 //TODO: implement connection to image save and resize
 func uploadImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	file, _, err := r.FormFile("uploadfile")
+	// e := govalidator.New(govalidator.Options{
+	// 	Request:         r,
+	// 	Rules:           imageUploadValidator,
+	// 	RequiredDefault: true,
+	// }).Validate()
+	// if e != nil {
+	// 	err := map[string]interface{}{"validationError": e}
+	// 	w.Header().Set("Content-type", "application/json")
+	// 	json.NewEncoder(w).Encode(err)
+	// }
+
+	file, handler, err := r.FormFile("uploadfile")
 	if err != nil {
 		parseErrorResponse(w)
 		return
 	}
 	defer file.Close()
 	uid := r.PostForm.Get("uid")
-	// contentType := handler.Header.Get("Content-Type")
+	contentType := handler.Header.Get("Content-Type")
 
-	media.SaveFileFromIOReader(uid+"/image.jpg", file)
+	path := media.PathMaker("user", uid)
+	name := media.NameMaker(contentType)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("hello"))
+	media.SaveFileFromIOReader(path, name, file)
+
+	jsonResponse(w, ImageResponse{"success", path + name})
 }
 
 // GetRouter returns the default server router
