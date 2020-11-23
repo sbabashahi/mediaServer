@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"codeberg.org/ymazdy/mediamanager/server"
@@ -14,5 +15,5 @@ func main() {
 	nRouter := server.FormParseMiddleware(router)
 
 	fmt.Println("Starting the Server")
-	http.ListenAndServe(":8080", nRouter)
+	log.Fatal(http.ListenAndServe(":8080", nRouter))
 }

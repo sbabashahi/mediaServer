@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"codeberg.org/ymazdy/mediamanager/media"
@@ -10,7 +9,7 @@ import (
 
 //TODO: remove index test after initial phase
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "Welcome!\n")
+	w = JSONResponse(w, make(map[string]int, 0), "Welcome", 0, 0, 200)
 }
 
 //MARK: upload user image route
