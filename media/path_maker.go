@@ -10,7 +10,10 @@ var basePath = "./"
 
 // PathMaker makes a path based on section (company, user) and uid (or company slug)
 func PathMaker(section string, uid string) string {
-	path := fmt.Sprintf("%s%s/%s/", basePath, section, uid)
+	path := fmt.Sprintf("%s%s/", basePath, section)
+	if uid != "" {
+		path = fmt.Sprintf("%s%s/", path, uid)
+	}
 	return path
 }
 
