@@ -3,7 +3,13 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"image/jpeg"
+	"log"
 	"net/http"
+	"os"
+
+	"codeberg.org/ymazdy/mediamanager/media"
+	"github.com/nfnt/resize"
 )
 
 // FormParseMiddleware parses user form data
@@ -59,5 +65,35 @@ func checkFileSize(size int64) error {
 		message := fmt.Sprintf("Max file size is %d but your file size is %d", maxFileSize, size)
 		return fmt.Errorf(message)
 	}
+	return nil
+}
+
+func resizeImage(filePath string) error {
+	
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	// decode jpeg into image.Image
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// resize file to this width and height
+	imageSize := map[int]int{100: 100, 200: 200, 300: 300}
+	for width, height := range imageSize {
+		m := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
+		out, err := os.Create(media.ResizeNameMaker(filePath, width, height))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer out.Close()
+	
+		// write new image to file
+		jpeg.Encode(out, m, nil)
+	}
+	
 	return nil
 }

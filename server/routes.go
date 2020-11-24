@@ -10,12 +10,12 @@ import (
 
 //TODO: remove index test after initial phase
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w = JSONResponse(w, make(map[string]int, 0), "Welcome", 0, 0, 200)
+	w = JSONResponse(w, nil, "Welcome", 0, 0, 200)
 }
 
 //MARK: upload user image route
 //TODO: implement connection to image save and resize
-func uploadImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// e := govalidator.New(govalidator.Options{
 	// 	Request:         r,
 	// 	Rules:           imageUploadValidator,
@@ -50,6 +50,7 @@ func uploadImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	media.SaveFileFromIOReader(path, name, file)
 
 	JSONResponse(w, ImageResponse{path+name}, "Upload Success", 0, 0, 200)
+	go resizeImage(path+name)
 }
 
 // GetRouter returns the default server router
@@ -67,7 +68,7 @@ func GetRouter() *httprouter.Router {
 	})
 
 	router.GET("/", index)
-	router.POST("/image/", uploadImage)
+	router.POST("/upload/", upload)
 
 	return router
 }

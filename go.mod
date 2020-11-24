@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/thedevsaddam/govalidator v1.9.10
 	github.com/thedevsaddam/renderer v1.2.0 // indirect
