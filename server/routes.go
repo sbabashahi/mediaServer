@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"codeberg.org/ymazdy/mediamanager/media"
@@ -26,21 +27,29 @@ func uploadImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// 	json.NewEncoder(w).Encode(err)
 	// }
 
-	file, handler, err := r.FormFile("uploadfile")
+	file, fileHeader, err := r.FormFile("uploadfile")
 	if err != nil {
 		parseErrorResponse(w)
 		return
 	}
 	defer file.Close()
 	uid := r.PostForm.Get("uid")
-	contentType := handler.Header.Get("Content-Type")
-
+	contentType := fileHeader.Header.Get("Content-Type")
+	
+	if err = checkFileContentType(contentType);err != nil {
+		JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
+		return
+	}
+	if err = checkFileSize(fileHeader.Size);err != nil {
+		JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
+		return
+	}
 	path := media.PathMaker("user", uid)
 	name := media.NameMaker(contentType)
 
 	media.SaveFileFromIOReader(path, name, file)
 
-	jsonResponse(w, ImageResponse{"success", path + name})
+	JSONResponse(w, ImageResponse{path+name}, "Upload Success", 0, 0, 200)
 }
 
 // GetRouter returns the default server router

@@ -9,7 +9,9 @@ import (
 // FormParseMiddleware parses user form data
 func FormParseMiddleware(handler http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
-		r.ParseMultipartForm(32 << 20)
+		if err:=r.ParseMultipartForm(10 << 20); err != nil {
+			JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
+		}// 10 MB
 		err := r.ParseForm()
 		if err != nil {
 			w.WriteHeader(400)
@@ -38,5 +40,24 @@ func jsonResponse(w http.ResponseWriter, v interface{}) error {
 		}
 	}
 
+	return nil
+}
+
+func checkFileContentType(contentType string) error {
+	supportedMediaTypes := map[string]bool{"image/jpeg": true, "image/png": true}
+	_, exist := supportedMediaTypes[contentType]
+	if !exist {
+		message := fmt.Sprintf("Not supported content- %v ", contentType)
+		return fmt.Errorf(message)
+	}
+	return nil
+}
+
+func checkFileSize(size int64) error {
+	maxFileSize := int64(10*1024*1024)  // 10 MB
+	if size > maxFileSize {
+		message := fmt.Sprintf("Max file size is %d but your file size is %d", maxFileSize, size)
+		return fmt.Errorf(message)
+	}
 	return nil
 }
