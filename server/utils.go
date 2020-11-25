@@ -7,10 +7,23 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+
+	"github.com/jtguibas/cinema"
+	"github.com/nfnt/resize"
 
 	"codeberg.org/ymazdy/mediamanager/media"
-	"github.com/nfnt/resize"
 )
+
+var supportedMediaTypes map[string]int64
+
+func init() {
+    supportedMediaTypes = map[string]int64{
+		"image/jpeg": int64(10*1024*1024),
+		"image/png": int64(10*1024*1024),
+		"video/mp4": int64(50*1024*1024),
+		}
+}
 
 // FormParseMiddleware parses user form data
 func FormParseMiddleware(handler http.Handler) http.Handler {
@@ -50,7 +63,6 @@ func jsonResponse(w http.ResponseWriter, v interface{}) error {
 }
 
 func checkFileContentType(contentType string) error {
-	supportedMediaTypes := map[string]bool{"image/jpeg": true, "image/png": true}
 	_, exist := supportedMediaTypes[contentType]
 	if !exist {
 		message := fmt.Sprintf("Not supported content- %v ", contentType)
@@ -59,40 +71,52 @@ func checkFileContentType(contentType string) error {
 	return nil
 }
 
-func checkFileSize(size int64) error {
-	maxFileSize := int64(10*1024*1024)  // 10 MB
+func checkFileSize(size int64, contentType string) error {
+	maxFileSize := supportedMediaTypes[contentType]
 	if size > maxFileSize {
-		message := fmt.Sprintf("Max file size is %d but your file size is %d", maxFileSize, size)
+		message := fmt.Sprintf("Max file size for %s is %d but your file size is %d", contentType, maxFileSize, size)
 		return fmt.Errorf(message)
 	}
 	return nil
 }
 
-func resizeImage(filePath string) error {
+func mediaConvertor(filePath, contentType string) error {
 	
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	// decode jpeg into image.Image
-	img, err := jpeg.Decode(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// resize file to this width and height
-	imageSize := map[int]int{100: 100, 200: 200, 300: 300}
-	for width, height := range imageSize {
-		m := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
-		out, err := os.Create(media.ResizeNameMaker(filePath, width, height))
+	if strings.HasPrefix(contentType, "image/") {
+		file, err := os.Open(filePath)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		defer file.Close()
+		// decode jpeg into image.Image
+		img, err := jpeg.Decode(file)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer out.Close()
-	
-		// write new image to file
-		jpeg.Encode(out, m, nil)
+		// resize file to this width and height
+		imageSize := map[int]int{100: 100, 200: 200, 300: 300}
+		for width, height := range imageSize {
+			m := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
+			out, err := os.Create(media.ResizeNameMaker(filePath, width, height))
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer out.Close()
+		
+			// write new image to file
+			jpeg.Encode(out, m, nil)
+		}
+	} else if strings.HasPrefix(contentType, "video"){
+		video, err := cinema.Load(filePath)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		width, height := video.Width()/10, video.Height()/10
+		video.SetSize(width, height)
+		path := media.ResizeNameMaker(filePath, width, height)
+		video.Render(path)  // check for another way of converting, it increse audio and video bitrate :|
 	}
 	
 	return nil

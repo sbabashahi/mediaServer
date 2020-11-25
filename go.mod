@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
+	github.com/jtguibas/cinema v0.0.0-20200208054232-ca271f28a020
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pelletier/go-toml v1.8.1 // indirect

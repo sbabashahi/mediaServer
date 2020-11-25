@@ -27,5 +27,5 @@ func NameMaker(contentType string) string {
 // ResizeNameMaker make file name for resized files
 func ResizeNameMaker(filename string, width, height int) string {
 	fileNameParts := strings.Split(filename, ".")
-	return fmt.Sprintf("%s_%d_%d_%s", fileNameParts[0], width, height, fileNameParts[1])
+	return fmt.Sprintf(".%s_%d_%d_.%s", fileNameParts[1], width, height, fileNameParts[2])
 }

@@ -40,7 +40,7 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
 		return
 	}
-	if err = checkFileSize(fileHeader.Size);err != nil {
+	if err = checkFileSize(fileHeader.Size, contentType);err != nil {
 		JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
 		return
 	}
@@ -50,7 +50,7 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	media.SaveFileFromIOReader(path, name, file)
 
 	JSONResponse(w, ImageResponse{path+name}, "Upload Success", 0, 0, 200)
-	go resizeImage(path+name)
+	go mediaConvertor(path+name, contentType)
 }
 
 // GetRouter returns the default server router
