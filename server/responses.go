@@ -2,7 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"log"
 	"time"
 )
 
@@ -28,6 +30,10 @@ func JSONResponse(w http.ResponseWriter, data interface{}, message string, index
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		panic(err)
 	}
-	
+	if status {
+		log.Println(fmt.Sprintf("Success response status %v, Message: %v", statusCode, message))
+	} else {
+		log.Println(fmt.Sprintf("Error response status %v, Message: %v", statusCode, message))
+	}
 	return w
 }

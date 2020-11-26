@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
-	"codeberg.org/ymazdy/mediamanager/media"
 	"github.com/julienschmidt/httprouter"
+
+	"codeberg.org/ymazdy/mediamanager/media"
 )
 
 //TODO: remove index test after initial phase
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w = JSONResponse(w, nil, "Welcome", 0, 0, 200)
+	value := r.Context().Value(user)
+	w = JSONResponse(w, nil, fmt.Sprintf("Welcome %v", value), 0, 0, 200)
 }
 
 //MARK: upload user image route
@@ -54,7 +56,7 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 // GetRouter returns the default server router
-func GetRouter() *httprouter.Router {
+func GetRouter() http.Handler {
 	router := httprouter.New()
 
 	//MARK: implementing cors headers for frontend
@@ -69,6 +71,6 @@ func GetRouter() *httprouter.Router {
 
 	router.GET("/", index)
 	router.POST("/upload/", upload)
-
-	return router
+	middlewareRouter := FormParseMiddleware(MyMiddleware(router))
+	return middlewareRouter
 }
