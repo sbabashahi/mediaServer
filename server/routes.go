@@ -11,6 +11,7 @@ import (
 
 //TODO: remove index test after initial phase
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	// example of getting context
 	value := r.Context().Value(user)
 	w = JSONResponse(w, nil, fmt.Sprintf("Welcome %v", value), 0, 0, 200)
 }
@@ -28,7 +29,6 @@ func upload(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// 	w.Header().Set("Content-type", "application/json")
 	// 	json.NewEncoder(w).Encode(err)
 	// }
-
 	file, fileHeader, err := r.FormFile("uploadfile")
 	if err != nil {
 		parseErrorResponse(w)

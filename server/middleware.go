@@ -5,7 +5,7 @@ import (
     "fmt"
 	"net/http"
 )
-
+// example of setting context
 type customString string
 const user customString = "user"
 // User struct
@@ -18,6 +18,7 @@ type User struct {
 //MyMiddleware is good
 func MyMiddleware(handler http.Handler) http.Handler {
 	middleware := func(w http.ResponseWriter, r *http.Request) {
+		// example of setting context
         ctx := context.WithValue(r.Context(), user, User{"saeed70", "saeed", "babashahi", 127})
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	}
@@ -37,7 +38,8 @@ func FormParseMiddleware(handler http.Handler) http.Handler {
 			JSONResponse(w, nil, fmt.Sprint(err), 0, 0, 400)
 			return
 		}
-		fmt.Println(r.Header.Get("Authorization"))
+		// example of header parsing
+		// fmt.Println(r.Header.Get("Authorization"))
 		handler.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(middleware)
