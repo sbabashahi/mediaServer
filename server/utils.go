@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/jpeg"
 	"log"
 	"net/http"
@@ -67,7 +68,7 @@ func checkFileSize(size int64, contentType string) error {
 
 func mediaConvertor(filePath, contentType string) error {
 	
-	if strings.HasPrefix(contentType, "image/") {
+	if strings.HasPrefix(contentType, "image/jpeg") {
 		file, err := os.Open(filePath)
 		if err != nil {
 			log.Fatal(err)
@@ -75,13 +76,19 @@ func mediaConvertor(filePath, contentType string) error {
 		}
 		defer file.Close()
 		// decode jpeg into image.Image
+
 		img, err := jpeg.Decode(file)
 		if err != nil {
 			log.Fatal(err)
 		}
 		// resize file to this width and height
-		imageSize := map[int]int{100: 100, 200: 200, 300: 300}
-		for width, height := range imageSize {
+		file.Seek(0, 0)
+		im, _, _ := image.DecodeConfig(file)
+		imageSize := []int{2, 5 , 10}
+		for _, rate := range imageSize {
+			// width, height := 10/rate, 10/rate
+			width, height := im.Width/rate, im.Height/rate
+			fmt.Println(im.Width, im.Height, width, height, rate)
 			m := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
 			out, err := os.Create(media.ResizeNameMaker(filePath, width, height))
 			if err != nil {
