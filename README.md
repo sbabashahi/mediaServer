@@ -1,3 +1,5 @@
+This project is for training purposes. A rest API server to upload files. I tried to learn golang.
+
 **AIR**   ->        https://github.com/cosmtrek/air
     after installation of it in project add alias air='./bin/air' to .bashrc and add .air.toml to project.
 
